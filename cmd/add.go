@@ -1,6 +1,5 @@
 /*
 Copyright © 2024 NAME HERE <EMAIL ADDRESS>
-
 */
 package cmd
 
@@ -13,9 +12,13 @@ import (
 var addCmd = &cobra.Command{
 	Use:   "add",
 	Short: "A brief description of your command",
-	Long: `add files to the clipoard that allows you to keep track of them`,
+	Long:  `add files to the clipoard that allows you to keep track of them`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("add called")
+		if len(args) == 0 {
+			fmt.Println("No files to add")
+			return
+		}
+		AddFile(args)
 	},
 }
 
