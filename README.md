@@ -3,11 +3,6 @@ yyt (pronounced yeet) is a small program that basically keeps track of files you
 This project was created as a way for me to get acquainted with a programming language as this project covers a lot of  
 areas in programming languages including file systems, File IO, a programming language's standard library and so on.
 
-There will be multiple implementations of the program in different languages  
-as I explore said language. The following languages have so far being implemented  
-
-* C
-
 # How to use?
 `yyt add <file1> <file2> ...` adds specific file(s) to the buffer without affecting the original files  
 `yyt ls` lists all files currently in the buffer  
