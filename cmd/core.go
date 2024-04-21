@@ -3,56 +3,28 @@ package cmd
 import (
 	"bufio"
 	"fmt"
+    "path/filepath"
 	"os"
-	"strings"
 )
 
-// AddFile adds files to the clipboard
-func AddFile(files []string) error {
-	currentSize, err := fileSize()
-	if err != nil {
-		return fmt.Errorf("error getting file size: %w", err)
-	}
-	// clipboard is full
-	if currentSize >= maxFiles {
-        // calculate the number of lines to keep
-        var lastLines = 0
-        fileLen := len(files)
-        if maxFiles > fileLen {
-            lastLines = fileLen
-        } else {
-            lastLines = fileLen - maxFiles
+// validFiles returns a list of valid files
+func validFiles(files []string) ([]string, error) {
+	var validFiles []string
+	for _, f := range files {
+        file, _ := filepath.Abs(f)
+		if fileInfo, err := os.Stat(file); err == nil {
+			// in the future if we wish to include directories, it should
+			// be an easy change and should be done here
+			if fileInfo.Mode().IsRegular() {
+				validFiles = append(validFiles, file)
+			}
+		} else {
+            // prompt user a file doesn't exist
+            return validFiles, fmt.Errorf(
+                "yyt: file %q doesn't exist or is not a file. cancelling...\n", f)
         }
-
-		var newLines []string = getLastLines(lastLines)
-		for i := lastLines - 1; i < len(files); i++ {
-			newLines = append(newLines, files[i])
-		}
-
-        // create a temp file to write to
-		temp, _ := os.CreateTemp("", "yyt-*")
-		defer os.Remove(temp.Name())
-
-		if _, err := temp.Write([]byte(strings.Join(newLines, "\n"))); err != nil {
-			return fmt.Errorf("error writing to temp file: %w", err)
-		}
-
-		os.Rename(temp.Name(), clipboardLocation)
-		return nil
 	}
-
-	f, err := os.OpenFile(clipboardLocation, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
-	if err != nil {
-		return fmt.Errorf("error opening file: %v\n", err)
-	}
-	defer f.Close()
-	for _, fileEntry := range files {
-		if _, err := f.Write([]byte(fileEntry + "\n")); err != nil {
-			return fmt.Errorf("error getting file size: %w", err)
-		}
-	}
-
-	return nil
+	return validFiles, nil
 }
 
 func fileSize() (int, error) {
@@ -70,7 +42,7 @@ func fileSize() (int, error) {
 	return lines, nil
 }
 
-func getLastLines(fromLineNumber int) (retval []string) {
+func getLastLines(fromLineNumber int) []string {
 	// open the file
 	f, err := os.Open(clipboardLocation)
 	if err != nil {
@@ -85,6 +57,6 @@ func getLastLines(fromLineNumber int) (retval []string) {
 		lines = append(lines, scanner.Text())
 	}
 
-    retval = lines[fromLineNumber:]
-	return
+	retval := lines[fromLineNumber:]
+	return retval
 }
