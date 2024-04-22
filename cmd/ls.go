@@ -5,7 +5,6 @@ package cmd
 
 import (
 	"fmt"
-	"slices"
 	"strings"
 
 	//"github.com/fatih/color"
@@ -18,61 +17,59 @@ var listCmd = &cobra.Command{
 	Short: "List all files currently in the clipboard",
 	Long:  `ls displays all files in the current file for inspection`,
 	Run: func(cmd *cobra.Command, args []string) {
-        listFiles(args)
+        err := listFiles(args)
+        if err != nil {
+            fmt.Println(err)
+        }
 	},
 }
 
 // helper function for listing files
-func listFiles(args []string) {
-	foundUserEntry := false
-	entries := getLastLines(0)
-	plainFiles := rawFiles(entries)
+func listFiles(args []string) error {
+	entries := getLinesFrom(0)
+    if entries == nil {
+        return fmt.Errorf(
+            "yyt: there are no items in the clipboard. add an item with 'yyt add'...")
+    }
+	valueMappedEntries := mappedEntries(entries)
 
     // checks every one of the user's input against the clipboard's entries
 	if len(args) > 0 {
 		for _, value := range args {
-			if slices.Contains(plainFiles, value) {
-				// flag to trigger when the user's args is found
-				if !foundUserEntry {
-					foundUserEntry = true
-				}
-
-				idxOfEntry := slices.Index(plainFiles, value)
-				fmt.Printf("> %s @ %s\n", value, entries[idxOfEntry])
+            // check if the argument passed by the user is in the clipboard
+            if _, ok := valueMappedEntries[value]; ok {
+                fmt.Printf("> %s @ %s\n", value, valueMappedEntries[value])
 			} else {
                 fmt.Printf(
-                    "yyt: the file %q has not been added yet to the clipboard\n", value)
+                    "yyt: the file %q has not been added to the clipboard yet\n", value)
             }
 		}
 	} else {
+        // print everything if the length of args is 0
         for _, value := range entries {
-            // print everything if the length of args is 0
-            pathPoints := strings.Split(value, "/")
-            fmt.Printf("%s @ %s\n", pathPoints[len(pathPoints)-1], value)
+            fmt.Printf("%s\n", value)
         }
     }
+    return nil
 }
 
-func rawFiles(entries []string) []string {
-	var retVals []string
-	for _, v := range entries {
-		file := strings.Split(v, "/")
-		retVals = append(retVals, file[len(file)-1])
-	}
+// mappedEntries returns a map of the entries in the clipboard
+// by the filename and its path on the file system
+func mappedEntries(entries []string) map[string]string {
+    returnMap := make(map[string]string)
 
-	return retVals
+    // generate unique id for each entry
+    // when we're comparing, do a dynamic string operation where we
+    // remove the id and replace it with a random string
+
+    for _, v := range entries {
+        paths := strings.Split(v, "/")
+        returnMap[paths[len(paths) - 1]] = v
+    }
+
+    return returnMap
 }
 
 func init() {
 	rootCmd.AddCommand(listCmd)
-
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// listCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// listCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }

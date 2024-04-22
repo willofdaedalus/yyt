@@ -5,9 +5,11 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/spf13/cobra"
 	"os"
 	"strings"
+
+    // "github.com/google/uuid"
+    "github.com/spf13/cobra"
 )
 
 // addCmd represents the add command
@@ -31,7 +33,7 @@ var addCmd = &cobra.Command{
 // addFile adds files to the clipboard
 func addFile(files []string) error {
 	// check if there are invalid files being added
-	allValidFiles, err := validFiles(files)
+	allValidFiles, err := allValidFilePaths(files)
 	if err != nil {
 		return err
 	}
@@ -52,7 +54,10 @@ func addFile(files []string) error {
 			lastLines = fileLen - maxFiles
 		}
 
-		var oldLines []string = getLastLines(lastLines)
+        // get the last lines from the clipboard that would allow enough
+        // space for the new entries into the clipboard and append the new
+        // entries to the slice before finally writing it the clipboard
+		var oldLines []string = getLinesFrom(lastLines)
 		for i := lastLines - 1; i < len(files); i++ {
 			oldLines = append(oldLines, files[i])
 		}
@@ -61,7 +66,9 @@ func addFile(files []string) error {
 		temp, _ := os.CreateTemp("", "yyt-*")
 		defer os.Remove(temp.Name())
 
-		allValidFiles, _ = validFiles(oldLines)
+        // get all file paths for each entry in oldLines so we can store
+        // them in the clipboard file
+		allValidFiles, _ = allValidFilePaths(oldLines)
 
 		// write all valid entries containing updated files to the tempfile
 		// validFiles filters out the invalid files, prints them and returns

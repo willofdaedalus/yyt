@@ -5,10 +5,14 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+
+    "github.com/google/uuid"
 )
 
-// validFiles returns a list of valid files
-func validFiles(files []string) ([]string, error) {
+// allValidFilePaths returns a list of valid files in their absolute paths
+// gets the absolute path of the file and checks if it exists before adding
+// it to the list of valid files
+func allValidFilePaths(files []string) ([]string, error) {
 	var validFiles []string
 
 	for _, f := range files {
@@ -18,6 +22,7 @@ func validFiles(files []string) ([]string, error) {
 			return validFiles, fmt.Errorf(
 				"yyt: file %q doesn't exist or is not a file. cancelling...\n", f)
 		} else {
+            file = appendUniqueID(file)
 			validFiles = append(validFiles, file)
 		}
 	}
@@ -29,6 +34,11 @@ func checkFileExists(file string) bool {
 		return fileInfo.Mode().IsRegular()
 	}
 	return false
+}
+
+func appendUniqueID(file string) string {
+    uuid := uuid.New()
+    return fmt.Sprintf("%s-%s", file, uuid.String())
 }
 
 func fileSize() (int, error) {
@@ -46,7 +56,7 @@ func fileSize() (int, error) {
 	return lines, nil
 }
 
-func getLastLines(fromLineNumber int) []string {
+func getLinesFrom(fromLineNumber int) []string {
 	// open the file
 	f, err := os.Open(clipboardLocation)
 	if err != nil {
