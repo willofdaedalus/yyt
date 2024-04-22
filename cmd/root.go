@@ -10,7 +10,6 @@ import (
 
 const (
 	clipboardLocation = "/tmp/yyt"
-	tempFile          = "/tmp/yyt.tmp"
 	maxFiles          = 10
 )
 

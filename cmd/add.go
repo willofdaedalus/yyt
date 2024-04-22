@@ -21,20 +21,20 @@ var addCmd = &cobra.Command{
 			return
 		}
 
-        err := addFile(args)
-        if err != nil {
-            fmt.Print(err)
-        }
+		err := addFile(args)
+		if err != nil {
+			fmt.Print(err)
+		}
 	},
 }
 
 // addFile adds files to the clipboard
 func addFile(files []string) error {
-    // check if there are invalid files being added
-    allValidFiles, err := validFiles(files)
-    if err != nil {
-        return err
-    }
+	// check if there are invalid files being added
+	allValidFiles, err := validFiles(files)
+	if err != nil {
+		return err
+	}
 
 	currentSize, err := fileSize()
 	if err != nil {
@@ -61,13 +61,13 @@ func addFile(files []string) error {
 		temp, _ := os.CreateTemp("", "yyt-*")
 		defer os.Remove(temp.Name())
 
-        valids, _ := validFiles(oldLines)
+		allValidFiles, _ = validFiles(oldLines)
 
 		// write all valid entries containing updated files to the tempfile
-        // validFiles filters out the invalid files, prints them and returns
-        // all valid files
+		// validFiles filters out the invalid files, prints them and returns
+		// all valid files
 		if _, err := temp.Write([]byte(strings.Join(
-			valids, "\n") + "\n")); err != nil {
+			allValidFiles, "\n") + "\n")); err != nil {
 			return fmt.Errorf("error writing to temp file: %w", err)
 		}
 

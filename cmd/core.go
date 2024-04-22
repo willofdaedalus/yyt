@@ -3,28 +3,32 @@ package cmd
 import (
 	"bufio"
 	"fmt"
-    "path/filepath"
 	"os"
+	"path/filepath"
 )
 
 // validFiles returns a list of valid files
 func validFiles(files []string) ([]string, error) {
 	var validFiles []string
+
 	for _, f := range files {
-        file, _ := filepath.Abs(f)
-		if fileInfo, err := os.Stat(file); err == nil {
-			// in the future if we wish to include directories, it should
-			// be an easy change and should be done here
-			if fileInfo.Mode().IsRegular() {
-				validFiles = append(validFiles, file)
-			}
+		file, _ := filepath.Abs(f)
+
+		if !checkFileExists(file) {
+			return validFiles, fmt.Errorf(
+				"yyt: file %q doesn't exist or is not a file. cancelling...\n", f)
 		} else {
-            // prompt user a file doesn't exist
-            return validFiles, fmt.Errorf(
-                "yyt: file %q doesn't exist or is not a file. cancelling...\n", f)
-        }
+			validFiles = append(validFiles, file)
+		}
 	}
 	return validFiles, nil
+}
+
+func checkFileExists(file string) bool {
+	if fileInfo, err := os.Stat(file); err == nil {
+		return fileInfo.Mode().IsRegular()
+	}
+	return false
 }
 
 func fileSize() (int, error) {
