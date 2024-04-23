@@ -31,26 +31,38 @@ func listFiles(args []string) error {
         return fmt.Errorf(
             "yyt: there are no items in the clipboard. add an item with 'yyt add'...")
     }
-	valueMappedEntries := mappedEntries(entries)
+	// valueMappedEntries := mappedEntries(entries)
+    structuredEntries := structureEntries(entries)
 
     // checks every one of the user's input against the clipboard's entries
 	if len(args) > 0 {
-		for _, value := range args {
-            // check if the argument passed by the user is in the clipboard
-            if _, ok := valueMappedEntries[value]; ok {
-                fmt.Printf("> %s @ %s\n", value, valueMappedEntries[value])
-			} else {
-                fmt.Printf(
-                    "yyt: the file %q has not been added to the clipboard yet\n", value)
+        for _, value := range args {
+            for _, structEntry := range structuredEntries {
+                if structEntry.fileName == value {
+                    fmt.Printf("> %s @ %s\n", value, structEntry.filePath)
+                }
             }
-		}
+        }
 	} else {
         // print everything if the length of args is 0
-        for _, value := range entries {
-            fmt.Printf("%s\n", value)
+        for _, value := range structuredEntries {
+            fmt.Printf("> %s @ %s\n", value.fileName, value.filePath)
         }
     }
     return nil
+}
+
+
+func structureEntries(entries []string) []ClipboardEntry {
+    returnEntries := make([]ClipboardEntry, len(entries))
+
+    for i, v := range entries {
+        paths := strings.Split(v, "/")
+        returnEntries[i].fileName = paths[len(paths) - 1]
+        returnEntries[i].filePath = v
+    }
+
+    return returnEntries
 }
 
 // mappedEntries returns a map of the entries in the clipboard

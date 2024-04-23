@@ -5,9 +5,12 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-
-    "github.com/google/uuid"
 )
+
+type ClipboardEntry struct {
+    fileName, filePath string
+}
+
 
 // allValidFilePaths returns a list of valid files in their absolute paths
 // gets the absolute path of the file and checks if it exists before adding
@@ -22,7 +25,6 @@ func allValidFilePaths(files []string) ([]string, error) {
 			return validFiles, fmt.Errorf(
 				"yyt: file %q doesn't exist or is not a file. cancelling...\n", f)
 		} else {
-            file = appendUniqueID(file)
 			validFiles = append(validFiles, file)
 		}
 	}
@@ -34,11 +36,6 @@ func checkFileExists(file string) bool {
 		return fileInfo.Mode().IsRegular()
 	}
 	return false
-}
-
-func appendUniqueID(file string) string {
-    uuid := uuid.New()
-    return fmt.Sprintf("%s-%s", file, uuid.String())
 }
 
 func fileSize() (int, error) {
