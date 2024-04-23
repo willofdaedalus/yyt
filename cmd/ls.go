@@ -29,8 +29,7 @@ func listFiles(args []string) error {
         return fmt.Errorf(
             "yyt: there are no items in the clipboard. add an item with 'yyt add'...")
     }
-	// valueMappedEntries := mappedEntries(entries)
-    structuredEntries := structureEntries(entries)
+    missingEntries, liveEntries := sortMissingEntries(structureEntries(entries))
 
     // checks every one of the user's input against the clipboard's entries
 	if len(args) > 0 {
@@ -38,7 +37,7 @@ func listFiles(args []string) error {
         var unfoundValuesSlice []string
 
         for _, value := range args {
-            for _, structEntry := range structuredEntries {
+            for _, structEntry := range liveEntries {
                 if structEntry.fileName == value {
                     fmt.Printf("> %s @ %s\n", value, structEntry.filePath)
                     foundValue = true
@@ -62,11 +61,36 @@ func listFiles(args []string) error {
         }
 	} else {
         // print everything if the length of args is 0
-        for _, value := range structuredEntries {
+        for _, value := range liveEntries {
             fmt.Printf("> %s @ %s\n", value.fileName, value.filePath)
         }
     }
+
+    if missingEntries != nil {
+        fmt.Println(
+            "\nyyt: the following files are in the clipboard but may have been moved or deleted")
+        fmt.Println("run \"yyt clean\" to remove them from the clipboard")
+
+        for i, value := range missingEntries {
+            fmt.Printf("%v. %s @ %s\n", i + 1, value.fileName, value.filePath)
+        }
+    }
+
     return nil
+}
+
+func sortMissingEntries(allEntries []ClipboardEntry) ([]ClipboardEntry, []ClipboardEntry) {
+    var missingEntries, liveEntries []ClipboardEntry
+
+    for _, entry := range allEntries {
+        if checkFileExists(entry.filePath) {
+            liveEntries = append(liveEntries, entry)
+        } else {
+            missingEntries = append(missingEntries, entry)
+        }
+    }
+
+    return missingEntries, liveEntries
 }
 
 func init() {
