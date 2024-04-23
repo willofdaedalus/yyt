@@ -5,9 +5,7 @@ package cmd
 
 import (
 	"fmt"
-	"strings"
 
-	//"github.com/fatih/color"
 	"github.com/spf13/cobra"
 )
 
@@ -36,11 +34,30 @@ func listFiles(args []string) error {
 
     // checks every one of the user's input against the clipboard's entries
 	if len(args) > 0 {
+        foundValue := false
+        var unfoundValuesSlice []string
+
         for _, value := range args {
             for _, structEntry := range structuredEntries {
                 if structEntry.fileName == value {
                     fmt.Printf("> %s @ %s\n", value, structEntry.filePath)
+                    foundValue = true
                 }
+            }
+
+            // create an array to keep all unfound values for display later
+            if !foundValue {
+                unfoundValuesSlice = append(unfoundValuesSlice, value)
+            }
+            foundValue = false
+        }
+
+        // print all args passed that are not in the buffer
+        if len(unfoundValuesSlice) > 0 {
+            fmt.Println(
+                "\nyyt: the following passed args were not found in the clipboard")
+            for _, v := range unfoundValuesSlice {
+                fmt.Println(v)
             }
         }
 	} else {
@@ -50,36 +67,6 @@ func listFiles(args []string) error {
         }
     }
     return nil
-}
-
-
-func structureEntries(entries []string) []ClipboardEntry {
-    returnEntries := make([]ClipboardEntry, len(entries))
-
-    for i, v := range entries {
-        paths := strings.Split(v, "/")
-        returnEntries[i].fileName = paths[len(paths) - 1]
-        returnEntries[i].filePath = v
-    }
-
-    return returnEntries
-}
-
-// mappedEntries returns a map of the entries in the clipboard
-// by the filename and its path on the file system
-func mappedEntries(entries []string) map[string]string {
-    returnMap := make(map[string]string)
-
-    // generate unique id for each entry
-    // when we're comparing, do a dynamic string operation where we
-    // remove the id and replace it with a random string
-
-    for _, v := range entries {
-        paths := strings.Split(v, "/")
-        returnMap[paths[len(paths) - 1]] = v
-    }
-
-    return returnMap
 }
 
 func init() {

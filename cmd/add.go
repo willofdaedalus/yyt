@@ -33,7 +33,7 @@ var addCmd = &cobra.Command{
 // addFile adds files to the clipboard
 func addFile(files []string) error {
 	// check if there are invalid files being added
-	allValidFiles, err := allValidFilePaths(files)
+	allValidFiles, err := validateAllFilePaths(files)
 	if err != nil {
 		return err
 	}
@@ -68,7 +68,7 @@ func addFile(files []string) error {
 
         // get all file paths for each entry in oldLines so we can store
         // them in the clipboard file
-		allValidFiles, _ = allValidFilePaths(oldLines)
+		allValidFiles, _ = validateAllFilePaths(oldLines)
 
 		// write all valid entries containing updated files to the tempfile
 		// validFiles filters out the invalid files, prints them and returns

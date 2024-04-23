@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+    "strings"
 )
 
 type ClipboardEntry struct {
@@ -12,10 +13,10 @@ type ClipboardEntry struct {
 }
 
 
-// allValidFilePaths returns a list of valid files in their absolute paths
+// validateAllFilePaths returns a list of valid files in their absolute paths
 // gets the absolute path of the file and checks if it exists before adding
 // it to the list of valid files
-func allValidFilePaths(files []string) ([]string, error) {
+func validateAllFilePaths(files []string) ([]string, error) {
 	var validFiles []string
 
 	for _, f := range files {
@@ -36,6 +37,18 @@ func checkFileExists(file string) bool {
 		return fileInfo.Mode().IsRegular()
 	}
 	return false
+}
+
+func structureEntries(entries []string) []ClipboardEntry {
+    returnEntries := make([]ClipboardEntry, len(entries))
+
+    for i, v := range entries {
+        paths := strings.Split(v, "/")
+        returnEntries[i].fileName = paths[len(paths) - 1]
+        returnEntries[i].filePath = v
+    }
+
+    return returnEntries
 }
 
 func fileSize() (int, error) {
