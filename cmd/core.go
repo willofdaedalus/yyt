@@ -66,7 +66,8 @@ func fileSize() (int, error) {
 	return lines, nil
 }
 
-func getLinesFrom(fromLineNumber int) []string {
+func getLinesFrom(fromLineNumber int) []ClipboardEntry {
+    var retEntries []ClipboardEntry
 	// open the file
 	f, err := os.Open(clipboardLocation)
 	if err != nil {
@@ -81,6 +82,34 @@ func getLinesFrom(fromLineNumber int) []string {
 		lines = append(lines, scanner.Text())
 	}
 
-	retval := lines[fromLineNumber:]
-	return retval
+    lines = lines[fromLineNumber:]
+    for _, line := range lines {
+        paths := strings.Split(line, "/")
+        fileName := paths[len(paths) - 1]
+        returnEntry  := ClipboardEntry{fileName, line}
+
+        retEntries = append(retEntries, returnEntry)
+    }
+
+	return retEntries
+}
+
+func makeEntriesSlice(files []string) ([]string, []ClipboardEntry) {
+    var (
+        fakes []string
+        liveFiles []ClipboardEntry
+    )
+
+	for _, f := range files {
+		file, _ := filepath.Abs(f)
+
+		if !checkFileExists(file) {
+            fakes = append(fakes, f)
+		} else {
+            tempEntry := ClipboardEntry {fileName: f, filePath: file}
+            liveFiles = append(liveFiles, tempEntry)
+		}
+	}
+
+    return fakes, liveFiles
 }

@@ -29,7 +29,7 @@ func listFiles(args []string) error {
         return fmt.Errorf(
             "yyt: there are no items in the clipboard. add an item with 'yyt add'...")
     }
-    missingEntries, liveEntries := sortMissingEntries(structureEntries(entries))
+    missingEntries, liveEntries := sortMissingEntries(entries)
 
     // checks every one of the user's input against the clipboard's entries
 	if len(args) > 0 {
