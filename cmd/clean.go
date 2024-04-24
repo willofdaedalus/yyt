@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"slices"
 
 	"github.com/spf13/cobra"
 )
@@ -42,7 +43,9 @@ func cleanClipboard() error {
 
 	// add all live links to the slice that will be written
 	for _, e := range entries {
-        existingEntries = append(existingEntries, e.filePath)
+		if !slices.Contains(missingEntries, e) {
+			existingEntries = append(existingEntries, e.filePath)
+		}
 	}
 
     message := "yyt: the following files have been cleaned successfully"
