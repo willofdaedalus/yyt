@@ -21,14 +21,14 @@ non-existent entries in this case are entries that have links to files that
 may have been deleted or moved to another location.
 clean helps to make space for newer entries in the clipboard.`,
 	Run: func(cmd *cobra.Command, args []string) {
-        if len(args) == 0 {
-            err := cleanClipboard()
-            if err != nil {
-                fmt.Println(err)
-            }
-        } else {
-            fmt.Println("yyt: clean doesn't require any arguments")
-        }
+		if len(args) == 0 {
+			err := cleanClipboard()
+			if err != nil {
+				fmt.Println(err)
+			}
+		} else {
+			fmt.Println("yyt: clean doesn't require any arguments")
+		}
 	},
 }
 
@@ -46,7 +46,7 @@ func cleanClipboard() error {
 		return nil
 	}
 
-    // add all live links to the slice that will be written
+	// add all live links to the slice that will be written
 	for _, e := range entries {
 		if !slices.Contains(missingEntries, e) {
 			liveLinks = append(liveLinks, e.filePath)
@@ -80,14 +80,4 @@ func cleanClipboard() error {
 
 func init() {
 	rootCmd.AddCommand(cleanCmd)
-
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// cleanCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// cleanCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }

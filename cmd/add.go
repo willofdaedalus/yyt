@@ -6,6 +6,7 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"slices"
 	"strings"
 
 	// "github.com/google/uuid"
@@ -23,18 +24,27 @@ var addCmd = &cobra.Command{
 			return
 		}
 
-		fakes, actualFiles := makeEntriesSlice(args)
+		fakes, skippedEntries, incomingFiles := filterDuplicates(args)
 
-		if actualFiles != nil {
-			err := addFile(actualFiles)
+		if incomingFiles != nil {
+			err := addFile(incomingFiles)
 			if err != nil {
 				fmt.Print(err)
 			}
 		}
 
+		if skippedEntries != nil {
+			fmt.Println(
+				"\nyyt: the following args are already in the clipboard; skipped.")
+
+			for i, value := range skippedEntries {
+				fmt.Printf("%v. %s\n", i, value)
+			}
+		}
+
 		if fakes != nil {
 			fmt.Println(
-				"\nyyt: the following args are either not files or are directories. skipping...")
+				"\nyyt: the following args are either not files or are directories; skipped.")
 
 			for i, value := range fakes {
 				fmt.Printf("%v. %s\n", i, value)
@@ -117,6 +127,37 @@ func addFile(files []ClipboardEntry) error {
 	}
 
 	return nil
+}
+
+// removes duplicates from being added to the clipboard
+// returns a slice of fake files, a slice of skipped files and a slice of unique files
+func filterDuplicates(incomingEntries []string) ([]string, []string, []ClipboardEntry) {
+	var (
+		nonDuplicates  []ClipboardEntry
+		skippedEntries []string
+	)
+
+	fakes, incomingFiles := makeEntriesSlice(incomingEntries)
+	existingEntries := getLinesFrom(0)
+
+    // check if there are already entries in the clipboard
+	if existingEntries != nil {
+		for _, file := range incomingFiles {
+			if !slices.Contains(existingEntries, file) {
+				nonDuplicates = append(nonDuplicates, file)
+			} else {
+				skippedEntries = append(skippedEntries, file.fileName)
+			}
+		}
+	} else {
+        for _, entry := range incomingFiles {
+            if !slices.Contains(nonDuplicates, entry) {
+                nonDuplicates = append(nonDuplicates, entry)
+            }
+        }
+    }
+
+	return fakes, skippedEntries, nonDuplicates
 }
 
 func init() {

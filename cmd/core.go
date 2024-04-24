@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 )
 
@@ -75,7 +76,11 @@ func makeEntriesSlice(files []string) ([]string, []ClipboardEntry) {
 			fakes = append(fakes, f)
 		} else {
 			tempEntry := ClipboardEntry{fileName: f, filePath: file}
-			liveFiles = append(liveFiles, tempEntry)
+
+			// only add files which haven't already been added to the liveFiles
+			if !slices.Contains(liveFiles, tempEntry) {
+				liveFiles = append(liveFiles, tempEntry)
+			}
 		}
 	}
 
