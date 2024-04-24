@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"os"
 	"slices"
-	"strings"
 
 	// "github.com/google/uuid"
 	"github.com/spf13/cobra"
@@ -56,7 +55,9 @@ var addCmd = &cobra.Command{
 // addFile adds files to the clipboard
 func addFile(files []ClipboardEntry) error {
 	var allFilePaths []string
+    message := "yyt: the following files have been added to successfully"
 	currentSize, err := fileSize()
+
 	if err != nil {
 		return fmt.Errorf("error getting file size: %w", err)
 	}
@@ -64,49 +65,29 @@ func addFile(files []ClipboardEntry) error {
 	// clipboard is full
 	if currentSize >= maxFiles {
 		// calculate the number of lines to keep
-		var lastLines = 0
+		var lastLine = 0
 		fileLen := len(files)
 		if maxFiles > fileLen {
-			lastLines = fileLen
+			lastLine = fileLen
 		} else {
-			lastLines = fileLen - maxFiles
+			lastLine = fileLen - maxFiles
 		}
 
 		// get the last lines from the clipboard that would allow enough
 		// space for the new entries into the clipboard and append the new
 		// entries to the slice before finally writing it the clipboard
-		var oldLines []ClipboardEntry = getLinesFrom(lastLines)
-		for i := lastLines - 1; i < len(files); i++ {
+		var oldLines []ClipboardEntry = getLinesFrom(lastLine)
+		for i := lastLine - 1; i < len(files); i++ {
 			oldLines = append(oldLines, files[i])
 		}
 
 		// create a temp file to write to
-		temp, _ := os.CreateTemp("", "yyt-*")
-		defer os.Remove(temp.Name())
-
 		for _, line := range oldLines {
 			allFilePaths = append(allFilePaths, line.filePath)
 		}
 
-		// write all valid entries containing updated files to the tempfile
-		// validFiles filters out the invalid files, prints them and returns
-		// all valid files
-		if _, err := temp.Write([]byte(strings.Join(
-			allFilePaths, "\n") + "\n")); err != nil {
-			return fmt.Errorf("error writing to temp file: %w", err)
-		}
+        writeToFile(message, allFilePaths, files)
 
-		defer func(okValues []string) {
-			fmt.Println(
-				"yyt: the following files have been added to successfully")
-
-			for _, f := range files {
-				fmt.Println(f.fileName)
-			}
-		}(allFilePaths)
-
-		// rename and replace the old clipboard file
-		os.Rename(temp.Name(), clipboardLocation)
 		return nil
 	}
 
@@ -125,6 +106,14 @@ func addFile(files []ClipboardEntry) error {
 			return fmt.Errorf("error getting file size: %w", err)
 		}
 	}
+
+    defer func() {
+        fmt.Println(message)
+
+        for _, f := range files {
+            fmt.Println(f.fileName)
+        }
+    }()
 
 	return nil
 }
@@ -150,6 +139,7 @@ func filterDuplicates(userArgs []string) ([]string, []string, []ClipboardEntry) 
 			}
 		}
 	} else {
+        // if the file doesn't exist
 		for _, entry := range incomingFiles {
 			if !slices.Contains(nonDuplicates, entry) {
 				nonDuplicates = append(nonDuplicates, entry)

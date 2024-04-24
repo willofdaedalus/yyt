@@ -1,6 +1,3 @@
-/*
-Copyright © 2024 NAME HERE <EMAIL ADDRESS>
-*/
 package cmd
 
 import (
@@ -19,6 +16,11 @@ to start with a fresh clipboard without manually removing every entry with
 yyt rm.`,
 	Run: func(cmd *cobra.Command, args []string) {
         // simply delete the file itself
+        if len(args) > 0 {
+            fmt.Println("yyt: purge doesn't require any arguments")
+            return
+        }
+
         err := os.Remove(clipboardLocation)
         if err != nil {
             fmt.Println("yyt: there are no entries in the clipboard")

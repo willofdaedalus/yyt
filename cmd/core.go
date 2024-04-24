@@ -86,3 +86,26 @@ func makeEntriesSlice(files []string) ([]string, []ClipboardEntry) {
 
 	return fakes, liveFiles
 }
+
+func writeToFile(msgToPrint string, entries []string, information []ClipboardEntry) error {
+    temp, _ := os.CreateTemp("", "yyt-*")
+    defer os.Remove(temp.Name())
+
+	if _, err := temp.Write([]byte(strings.Join(
+		entries, "\n") + "\n")); err != nil {
+		return fmt.Errorf("error writing to temp file: %w", err)
+	}
+
+    defer func() {
+        fmt.Println(msgToPrint)
+
+        for _, f := range information {
+            fmt.Println(f.fileName)
+        }
+    }()
+
+	// rename and replace the old clipboard file
+	os.Rename(temp.Name(), clipboardLocation)
+
+    return nil
+}

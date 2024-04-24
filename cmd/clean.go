@@ -2,9 +2,7 @@ package cmd
 
 import (
 	"fmt"
-	"os"
 	"slices"
-	"strings"
 
 	"github.com/spf13/cobra"
 )
@@ -50,28 +48,9 @@ func cleanClipboard() error {
 		}
 	}
 
-	temp, _ := os.CreateTemp("", "yyt-*")
-	defer os.Remove(temp.Name())
+    message := "yyt: the following files have been cleaned successfully"
+    writeToFile(message, liveLinks, missingEntries)
 
-	// write all valid entries containing updated files to the tempfile
-	// validFiles filters out the invalid files, prints them and returns
-	// all valid files
-	if _, err := temp.Write([]byte(strings.Join(
-		liveLinks, "\n") + "\n")); err != nil {
-		return fmt.Errorf("error writing to temp file: %w", err)
-	}
-
-	defer func() {
-		fmt.Println(
-			"yyt: the following files have been cleaned successfully")
-
-		for _, f := range missingEntries {
-			fmt.Println(f.fileName)
-		}
-	}()
-
-	// rename and replace the old clipboard file
-	os.Rename(temp.Name(), clipboardLocation)
 	return nil
 }
 
