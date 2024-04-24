@@ -131,13 +131,13 @@ func addFile(files []ClipboardEntry) error {
 
 // removes duplicates from being added to the clipboard
 // returns a slice of fake files, a slice of skipped files and a slice of unique files
-func filterDuplicates(incomingEntries []string) ([]string, []string, []ClipboardEntry) {
+func filterDuplicates(userArgs []string) ([]string, []string, []ClipboardEntry) {
 	var (
 		nonDuplicates  []ClipboardEntry
 		skippedEntries []string
 	)
 
-	fakes, incomingFiles := makeEntriesSlice(incomingEntries)
+	fakes, incomingFiles := makeEntriesSlice(userArgs)
 	existingEntries := getLinesFrom(0)
 
     // check if there are already entries in the clipboard
