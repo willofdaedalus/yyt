@@ -1,6 +1,3 @@
-/*
-Copyright © 2024 NAME HERE <EMAIL ADDRESS>
-*/
 package cmd
 
 import (
@@ -42,7 +39,7 @@ func cleanClipboard() error {
 	missingEntries, _ := sortMissingEntries(entries)
 
 	if missingEntries == nil {
-		fmt.Println("yyt: clipboard is clean; no missing files.")
+		fmt.Println("yyt: clipboard is clean; no dead files.")
 		return nil
 	}
 

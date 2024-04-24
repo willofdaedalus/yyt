@@ -140,7 +140,7 @@ func filterDuplicates(userArgs []string) ([]string, []string, []ClipboardEntry) 
 	fakes, incomingFiles := makeEntriesSlice(userArgs)
 	existingEntries := getLinesFrom(0)
 
-    // check if there are already entries in the clipboard
+	// check if there are already entries in the clipboard
 	if existingEntries != nil {
 		for _, file := range incomingFiles {
 			if !slices.Contains(existingEntries, file) {
@@ -150,12 +150,12 @@ func filterDuplicates(userArgs []string) ([]string, []string, []ClipboardEntry) 
 			}
 		}
 	} else {
-        for _, entry := range incomingFiles {
-            if !slices.Contains(nonDuplicates, entry) {
-                nonDuplicates = append(nonDuplicates, entry)
-            }
-        }
-    }
+		for _, entry := range incomingFiles {
+			if !slices.Contains(nonDuplicates, entry) {
+				nonDuplicates = append(nonDuplicates, entry)
+			}
+		}
+	}
 
 	return fakes, skippedEntries, nonDuplicates
 }

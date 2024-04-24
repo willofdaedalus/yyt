@@ -1,6 +1,3 @@
-/*
-Copyright © 2024 NAME HERE <EMAIL ADDRESS>
-*/
 package cmd
 
 import (
@@ -37,17 +34,17 @@ func listFiles(args []string) error {
 		foundValue := false
 		var unfoundValuesSlice []string
 
-        // convert all entries to lowercase and match against the user's entry
-        // which is also in lowercase
+		// convert all entries to lowercase and match against the user's entry
+		// which is also in lowercase
 		for _, value := range args {
 			// doing a for loop instead of a contains because of possible duplicates
 			for _, clipboardEntry := range clipboardEntries {
-                entryLowerCase := strings.ToLower(clipboardEntry.fileName)
+				entryLowerCase := strings.ToLower(clipboardEntry.fileName)
 
-                if strings.Contains(entryLowerCase, strings.ToLower(value)) {
+				if strings.Contains(entryLowerCase, strings.ToLower(value)) {
 					fmt.Printf("> %s @ %s\n", clipboardEntry.fileName, clipboardEntry.filePath)
 					foundValue = true
-                }
+				}
 			}
 
 			// create an array to keep all unfound values for display later
@@ -60,7 +57,7 @@ func listFiles(args []string) error {
 		// print all args passed that are not in the buffer
 		if len(unfoundValuesSlice) > 0 {
 			fmt.Println(
-				"\nyyt: the following passed args were not found in the clipboard")
+				"\nyyt: the following passed args did not match any entries in the clipboard")
 			for _, v := range unfoundValuesSlice {
 				fmt.Println(v)
 			}
