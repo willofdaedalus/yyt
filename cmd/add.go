@@ -6,7 +6,6 @@ package cmd
 import (
 	"fmt"
 	"os"
-	"slices"
 
 	// "github.com/google/uuid"
 	"github.com/spf13/cobra"
@@ -129,22 +128,27 @@ func filterDuplicates(userArgs []string) ([]string, []string, []ClipboardEntry) 
 	fakes, uniqueFiles := makeEntriesSlice(userArgs)
 	existingEntries := getLinesFrom(0)
 
-	// check if there are already entries in the clipboard
+	// Check if there are already entries in the clipboard
+    // there must be a better way to do this
+    // put a pin in it
 	if existingEntries != nil {
 		for _, file := range uniqueFiles {
-			if !slices.Contains(existingEntries, file) {
+			duplicate := false
+
+			for _, existingFile := range existingEntries {
+				if file.filePath == existingFile.filePath {
+					skippedEntries = append(skippedEntries, file.fileName)
+					duplicate = true
+					break
+				}
+			}
+			if !duplicate {
 				nonDuplicates = append(nonDuplicates, file)
-			} else {
-				skippedEntries = append(skippedEntries, file.fileName)
 			}
 		}
 	} else {
-        // if the file doesn't exist
-		for _, entry := range uniqueFiles {
-			if !slices.Contains(nonDuplicates, entry) {
-				nonDuplicates = append(nonDuplicates, entry)
-			}
-		}
+		// If the clipboard is empty, all incoming files are non-duplicates
+		nonDuplicates = uniqueFiles
 	}
 
 	return fakes, skippedEntries, nonDuplicates

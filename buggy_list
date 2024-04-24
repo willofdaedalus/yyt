@@ -1,0 +1,6 @@
+#!/bin/bash
+
+yyt add go.mod go.sum main.go LICENSE Makefile README.md yyt cmd/add.go cmd/clean.go cmd/purge.go
+yyt ls
+yyt rm make clean purge
+yyt ls
