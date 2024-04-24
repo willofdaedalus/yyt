@@ -28,46 +28,58 @@ found. If nothing is found the command simply prints a message and exits.`,
 }
 
 func removeFile(entries []string) error {
-    var (
-        entriesToKeep []string
-        removed []ClipboardEntry
-    )
-
     clipboardEntries := getLinesFrom(0)
     if clipboardEntries == nil {
         fmt.Println("yyt: there are no entries in the clipboard to remove.")
         return nil
     }
 
+    var (
+        entriesToKeep []string
+        removed       []ClipboardEntry
+    )
+
+    // Create a map to store lowercase versions of user arguments for efficient lookup
+    userArgsMap := make(map[string]struct{})
     for _, arg := range entries {
-        userArgToLower:= strings.ToLower(arg)
+        userArgsMap[strings.ToLower(arg)] = struct{}{}
+    }
 
-        for _, clipboardEntry := range clipboardEntries {
-            entryToLower := strings.ToLower(clipboardEntry.fileName)
+    for _, clipboardEntry := range clipboardEntries {
+        entryToLower := strings.ToLower(clipboardEntry.fileName)
 
-            if strings.Contains(entryToLower, userArgToLower) {
+        foundMatch := false
+        for userArg := range userArgsMap {
+            if strings.Contains(entryToLower, userArg) {
                 removed = append(removed, clipboardEntry)
-            } else {
-                entriesToKeep = append(entriesToKeep, clipboardEntry.filePath)
+                foundMatch = true
+                break // No need to check other user arguments for this clipboard entry
             }
+        }
+
+        if !foundMatch {
+            // Only append the entry to keep if it hasn't been removed
+            entriesToKeep = append(entriesToKeep, clipboardEntry.filePath)
         }
     }
 
-    // if there are no entries left in the clipboard, consider that a purge
+    // If there are no entries left in the clipboard, consider that a purge
     // and delete the file
     if len(entriesToKeep) == 0 {
         err := os.Remove(clipboardLocation)
         if err != nil {
-            fmt.Println("yyt: there are no entries in the clipboard")
-            return nil
+            fmt.Println("yyt: error removing clipboard file:", err)
+            return err
         }
-
         fmt.Println("yyt: all entries have been cleared from the clipboard")
         return nil
     }
 
     message := "yyt: the following files have been removed from the clipboard"
-    writeToFile(message, entriesToKeep, removed)
+    if err := writeToFile(message, entriesToKeep, removed); err != nil {
+        fmt.Println("yyt: error writing to file:", err)
+        return err
+    }
 
     return nil
 }

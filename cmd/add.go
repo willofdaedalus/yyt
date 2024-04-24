@@ -23,10 +23,10 @@ var addCmd = &cobra.Command{
 			return
 		}
 
-		fakes, skippedEntries, incomingFiles := filterDuplicates(args)
+		fakes, skippedEntries, uniqueFiles := filterDuplicates(args)
 
-		if incomingFiles != nil {
-			err := addFile(incomingFiles)
+		if uniqueFiles != nil {
+			err := addFile(uniqueFiles)
 			if err != nil {
 				fmt.Print(err)
 			}
@@ -126,12 +126,12 @@ func filterDuplicates(userArgs []string) ([]string, []string, []ClipboardEntry) 
 		skippedEntries []string
 	)
 
-	fakes, incomingFiles := makeEntriesSlice(userArgs)
+	fakes, uniqueFiles := makeEntriesSlice(userArgs)
 	existingEntries := getLinesFrom(0)
 
 	// check if there are already entries in the clipboard
 	if existingEntries != nil {
-		for _, file := range incomingFiles {
+		for _, file := range uniqueFiles {
 			if !slices.Contains(existingEntries, file) {
 				nonDuplicates = append(nonDuplicates, file)
 			} else {
@@ -140,7 +140,7 @@ func filterDuplicates(userArgs []string) ([]string, []string, []ClipboardEntry) 
 		}
 	} else {
         // if the file doesn't exist
-		for _, entry := range incomingFiles {
+		for _, entry := range uniqueFiles {
 			if !slices.Contains(nonDuplicates, entry) {
 				nonDuplicates = append(nonDuplicates, entry)
 			}

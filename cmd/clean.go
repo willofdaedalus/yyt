@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"fmt"
-	"slices"
 
 	"github.com/spf13/cobra"
 )
@@ -28,7 +27,7 @@ clean helps to make space for newer entries in the clipboard.`,
 }
 
 func cleanClipboard() error {
-	var liveLinks []string
+	var existingEntries []string
 	entries := getLinesFrom(0)
 	if entries == nil {
 		return fmt.Errorf(
@@ -43,13 +42,11 @@ func cleanClipboard() error {
 
 	// add all live links to the slice that will be written
 	for _, e := range entries {
-		if !slices.Contains(missingEntries, e) {
-			liveLinks = append(liveLinks, e.filePath)
-		}
+        existingEntries = append(existingEntries, e.filePath)
 	}
 
     message := "yyt: the following files have been cleaned successfully"
-    writeToFile(message, liveLinks, missingEntries)
+    writeToFile(message, existingEntries, missingEntries)
 
 	return nil
 }
