@@ -56,7 +56,6 @@ func addFile(files []ClipboardEntry) error {
 	var allFilePaths []string
 	message := "yyt: the following files have been added to successfully"
 	currentSize, err := fileSize()
-
 	if err != nil {
 		return fmt.Errorf("error getting file size: %w", err)
 	}
@@ -64,7 +63,7 @@ func addFile(files []ClipboardEntry) error {
 	// clipboard is full
 	if currentSize >= maxFiles {
 		// calculate the number of lines to keep
-		var lastLine = 0
+		lastLine := 0
 		fileLen := len(files)
 		if maxFiles > fileLen {
 			lastLine = fileLen
@@ -75,7 +74,7 @@ func addFile(files []ClipboardEntry) error {
 		// get the last lines from the clipboard that would allow enough
 		// space for the new entries into the clipboard and append the new
 		// entries to the slice before finally writing it the clipboard
-		var oldLines []ClipboardEntry = getLinesFrom(lastLine)
+		oldLines := getLinesFrom(lastLine)
 		for i := lastLine - 1; i < len(files); i++ {
 			oldLines = append(oldLines, files[i])
 		}
@@ -90,7 +89,7 @@ func addFile(files []ClipboardEntry) error {
 		return nil
 	}
 
-	f, err := os.OpenFile(clipboardLocation, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	f, err := os.OpenFile(clipboardLocation, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0o644)
 	if err != nil {
 		return fmt.Errorf("error opening file: %v\n", err)
 	}

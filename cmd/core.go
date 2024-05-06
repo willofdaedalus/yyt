@@ -21,7 +21,10 @@ func checkFileExists(file string) bool {
 }
 
 func fileSize() (int, error) {
-	f, _ := os.OpenFile(clipboardLocation, os.O_RDONLY|os.O_CREATE, 0644)
+	f, err := os.OpenFile(clipboardLocation, os.O_RDONLY|os.O_CREATE, 0o644)
+	if err != nil {
+		return 0, fmt.Errorf("error opening file: %w", err)
+	}
 	defer f.Close()
 
 	var lines int
