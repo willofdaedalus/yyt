@@ -4,8 +4,6 @@ Copyright © 2024 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
-	"os"
-
 	"github.com/spf13/cobra"
 )
 
@@ -14,7 +12,7 @@ const (
 	maxFiles          = 10
 )
 
-// rootCmd represents the base command when called without any subcommands
+// rootCmd represents the base command when called without any sub-commands
 var rootCmd = &cobra.Command{
 	Use:   "yyt",
 	Short: "Keep track of files in a clipboard-like manner.",
@@ -28,11 +26,8 @@ on the commandline and you want to keep track of files that you want to work.`,
 
 // Execute adds all child commands to the root command and sets flags appropriately.
 // This is called by main.main(). It only needs to happen once to the rootCmd.
-func Execute() {
-	err := rootCmd.Execute()
-	if err != nil {
-		os.Exit(1)
-	}
+func Execute() error {
+	return rootCmd.Execute()
 }
 
 func init() {
