@@ -12,11 +12,12 @@ var listCmd = &cobra.Command{
 	Use:   "ls",
 	Short: "List all files currently in the clipboard",
 	Long:  `ls displays all files in the current file for inspection`,
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(_ *cobra.Command, args []string) error {
 		err := listFiles(args)
 		if err != nil {
-			fmt.Println(err)
+			return fmt.Errorf("listing files: %w", err)
 		}
+		return nil
 	},
 }
 
@@ -25,7 +26,7 @@ func listFiles(args []string) error {
 	entries := getLinesFrom(0)
 	if entries == nil {
 		return fmt.Errorf(
-			"yyt: there are no items in the clipboard. add an item with 'yyt add'...")
+			"there are no items in the clipboard. add an item with 'yyt add'…")
 	}
 	missingEntries, clipboardEntries := sortMissingEntries(entries)
 
@@ -57,7 +58,7 @@ func listFiles(args []string) error {
 		// print all args passed that are not in the buffer
 		if len(unfoundValuesSlice) > 0 {
 			fmt.Println(
-				"\nyyt: the following passed args did not match any entries in the clipboard")
+				"yyt: the following passed args did not match any entries in the clipboard")
 			for _, v := range unfoundValuesSlice {
 				fmt.Println(v)
 			}
@@ -72,7 +73,7 @@ func listFiles(args []string) error {
 	// if there are any non-existent files in the clipboard prompt the user
 	if missingEntries != nil {
 		fmt.Println(
-			"\nyyt: the following files are in the clipboard but may have been moved or deleted")
+			"yyt: the following files are in the clipboard but may have been moved or deleted")
 		fmt.Println("run \"yyt clean\" to remove them from the clipboard")
 
 		for i, value := range missingEntries {

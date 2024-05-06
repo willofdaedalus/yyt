@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"strings"
@@ -14,23 +15,24 @@ var rmCmd = &cobra.Command{
 	Short: "Remove specific file(s) from the clipboard",
 	Long: `rm removes any passed file names from the clipboard if they are
 found. If nothing is found the command simply prints a message and exits.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		if args == nil {
-			fmt.Println("yyt: no files specified. exiting...")
-			return
+	RunE: func(cmd *cobra.Command, args []string) error {
+		if len(args) == 0 {
+			return errors.New("no files specified. exiting…")
 		}
 
 		err := removeFile(args)
 		if err != nil {
-			fmt.Println(err)
+			return fmt.Errorf("failed to remove files: %w", err)
 		}
+		return nil
 	},
 }
 
 func removeFile(entries []string) error {
 	clipboardEntries := getLinesFrom(0)
 	if clipboardEntries == nil {
-		fmt.Println("yyt: there are no entries in the clipboard to remove.")
+		// this is legitimate and shouldn't raise an error
+		printSuccess("there are no entries in the clipboard to remove.")
 		return nil
 	}
 
@@ -68,18 +70,22 @@ func removeFile(entries []string) error {
 	if len(entriesToKeep) == 0 {
 		err := os.Remove(clipboardLocation)
 		if err != nil {
-			fmt.Println("yyt: error removing clipboard file:", err)
-			return err
+			return fmt.Errorf("removing clipboard file: %w", err)
 		}
-		fmt.Println("yyt: all entries have been cleared from the clipboard")
+		printSuccess("all entries have been cleared from the clipboard")
 		return nil
 	}
 
-	message := "yyt: the following files have been removed from the clipboard"
-	if err := writeToFile(message, entriesToKeep, removed); err != nil {
-		fmt.Println("yyt: error writing to file:", err)
-		return err
+	if len(removed) == 0 {
+		return errors.New("the file was not in the clipboard")
 	}
+
+	if err := writeToFile(entriesToKeep); err != nil {
+		return fmt.Errorf("writing to file: %w", err)
+	}
+
+	printSuccess("the following files have been removed from the clipboard")
+	printFilesName(removed)
 
 	return nil
 }

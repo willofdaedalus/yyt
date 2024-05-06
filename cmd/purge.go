@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"errors"
 	"fmt"
 	"os"
 
@@ -14,20 +15,20 @@ var purgeCmd = &cobra.Command{
 	Long: `purge removes all the entries in the clipboard if the user wishes
 to start with a fresh clipboard without manually removing every entry with
 yyt rm.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		// simply delete the file itself
+	RunE: func(cmd *cobra.Command, args []string) error {
 		if len(args) > 0 {
-			fmt.Println("yyt: purge doesn't require any arguments")
-			return
+			return errors.New("purge doesn't require any arguments")
 		}
 
+		// simply delete the file itself
 		err := os.Remove(clipboardLocation)
 		if err != nil {
-			fmt.Println("yyt: there are no entries in the clipboard")
-			return
+			return fmt.Errorf("failed to remove file: %w", err)
 		}
 
-		fmt.Println("yyt: all entries have been cleared from the clipboard")
+		printSuccess("all entries have been cleared from the clipboard")
+
+		return nil
 	},
 }
 
