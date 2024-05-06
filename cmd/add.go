@@ -4,6 +4,7 @@ Copyright © 2024 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
+	"errors"
 	"fmt"
 	"os"
 
@@ -15,11 +16,10 @@ import (
 var addCmd = &cobra.Command{
 	Use:   "add",
 	Short: "add files to the clipboard",
-	Long:  `add files to the clipoard that allows you to keep track of them`,
-	Run: func(cmd *cobra.Command, args []string) {
+	Long:  `add files to the clipboard that allows you to keep track of them`,
+	RunE: func(cmd *cobra.Command, args []string) error {
 		if len(args) == 0 {
-			fmt.Println("No files to add")
-			return
+			return errors.New("no files to add")
 		}
 
 		fakes, skippedEntries, uniqueFiles := filterDuplicates(args)
@@ -27,13 +27,14 @@ var addCmd = &cobra.Command{
 		if uniqueFiles != nil {
 			err := addFile(uniqueFiles)
 			if err != nil {
-				fmt.Print(err)
+				cmd.SilenceUsage = true // no need to display Usage when a real error occurs
+				return fmt.Errorf("adding files: %w", err)
 			}
 		}
 
 		if skippedEntries != nil {
 			fmt.Println(
-				"\nyyt: the following args are already in the clipboard; skipped.")
+				"yyt: the following args are already in the clipboard; skipped.")
 
 			for i, value := range skippedEntries {
 				fmt.Printf("%v. %s\n", i, value)
@@ -42,29 +43,30 @@ var addCmd = &cobra.Command{
 
 		if fakes != nil {
 			fmt.Println(
-				"\nyyt: the following args are either not files or are directories; skipped.")
+				"yyt: the following args are either not files or are directories; skipped.")
 
 			for i, value := range fakes {
 				fmt.Printf("%v. %s\n", i, value)
 			}
 		}
+
+		return nil
 	},
 }
 
 // addFile adds files to the clipboard
 func addFile(files []ClipboardEntry) error {
 	var allFilePaths []string
-    message := "yyt: the following files have been added to successfully"
 	currentSize, err := fileSize()
-
 	if err != nil {
 		return fmt.Errorf("error getting file size: %w", err)
 	}
+	message := "the following files have been added to successfully"
 
 	// clipboard is full
 	if currentSize >= maxFiles {
 		// calculate the number of lines to keep
-		var lastLine = 0
+		lastLine := 0
 		fileLen := len(files)
 		if maxFiles > fileLen {
 			lastLine = fileLen
@@ -75,7 +77,7 @@ func addFile(files []ClipboardEntry) error {
 		// get the last lines from the clipboard that would allow enough
 		// space for the new entries into the clipboard and append the new
 		// entries to the slice before finally writing it the clipboard
-		var oldLines []ClipboardEntry = getLinesFrom(lastLine)
+		oldLines := getLinesFrom(lastLine)
 		for i := lastLine - 1; i < len(files); i++ {
 			oldLines = append(oldLines, files[i])
 		}
@@ -85,14 +87,20 @@ func addFile(files []ClipboardEntry) error {
 			allFilePaths = append(allFilePaths, line.filePath)
 		}
 
-        writeToFile(message, allFilePaths, files)
+		err = writeToFile(allFilePaths)
+		if err != nil {
+			return fmt.Errorf("error writing to file: %w", err)
+		}
+
+		printSuccess(message)
+		printFilesName(files)
 
 		return nil
 	}
 
-	f, err := os.OpenFile(clipboardLocation, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	f, err := os.OpenFile(clipboardLocation, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0o644)
 	if err != nil {
-		return fmt.Errorf("error opening file: %v\n", err)
+		return fmt.Errorf("error opening file: %w", err)
 	}
 	defer f.Close()
 
@@ -101,18 +109,13 @@ func addFile(files []ClipboardEntry) error {
 	}
 
 	for _, fileEntry := range allFilePaths {
-		if _, err := f.Write([]byte(fileEntry + "\n")); err != nil {
-			return fmt.Errorf("error getting file size: %w", err)
+		if _, err := f.WriteString(fileEntry + "\n"); err != nil {
+			return fmt.Errorf("error writing to file: %w", err)
 		}
 	}
 
-    defer func() {
-        fmt.Println(message)
-
-        for _, f := range files {
-            fmt.Println(f.fileName)
-        }
-    }()
+	printSuccess(message)
+	printFilesName(files)
 
 	return nil
 }
@@ -129,8 +132,8 @@ func filterDuplicates(userArgs []string) ([]string, []string, []ClipboardEntry) 
 	existingEntries := getLinesFrom(0)
 
 	// Check if there are already entries in the clipboard
-    // there must be a better way to do this
-    // put a pin in it
+	// there must be a better way to do this
+	// put a pin in it
 	if existingEntries != nil {
 		for _, file := range uniqueFiles {
 			duplicate := false

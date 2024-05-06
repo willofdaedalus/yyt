@@ -21,7 +21,10 @@ func checkFileExists(file string) bool {
 }
 
 func fileSize() (int, error) {
-	f, _ := os.OpenFile(clipboardLocation, os.O_RDONLY|os.O_CREATE, 0644)
+	f, err := os.OpenFile(clipboardLocation, os.O_RDONLY|os.O_CREATE, 0o644)
+	if err != nil {
+		return 0, fmt.Errorf("error opening file: %w", err)
+	}
 	defer f.Close()
 
 	var lines int
@@ -87,25 +90,34 @@ func makeEntriesSlice(files []string) ([]string, []ClipboardEntry) {
 	return fakes, liveFiles
 }
 
-func writeToFile(msgToPrint string, entries []string, information []ClipboardEntry) error {
-    temp, _ := os.CreateTemp("", "yyt-*")
-    defer os.Remove(temp.Name())
+func writeToFile(entries []string) error {
+	temp, err := os.CreateTemp("", "yyt-*")
+	if err != nil {
+		return fmt.Errorf("creating temp file: %w", err)
+	}
+	defer func() {
+		_ = os.Remove(temp.Name())
+	}()
 
-	if _, err := temp.Write([]byte(strings.Join(
-		entries, "\n") + "\n")); err != nil {
-		return fmt.Errorf("error writing to temp file: %w", err)
+	if _, err := temp.WriteString(strings.Join(entries, "\n") + "\n"); err != nil {
+		return fmt.Errorf("writing to temp file: %w", err)
 	}
 
-    defer func() {
-        fmt.Println(msgToPrint)
-
-        for _, f := range information {
-            fmt.Println(f.fileName)
-        }
-    }()
-
 	// rename and replace the old clipboard file
-	os.Rename(temp.Name(), clipboardLocation)
+	err = os.Rename(temp.Name(), clipboardLocation)
+	if err != nil {
+		return fmt.Errorf("renaming temp file: %w", err)
+	}
 
-    return nil
+	return nil
+}
+
+func printSuccess(message string) {
+	fmt.Printf("yyt: %s\n", message)
+}
+
+func printFilesName(entries []ClipboardEntry) {
+	for _, f := range entries {
+		fmt.Println(f.fileName)
+	}
 }
