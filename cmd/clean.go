@@ -21,8 +21,14 @@ clean helps to make space for newer entries in the clipboard.`,
 			return errors.New("clean doesn't require any arguments")
 		}
 
-		err := cleanClipboard()
+		entries := getLinesFrom(0)
+		if entries == nil {
+			return fmt.Errorf("there are no items in the clipboard. add an item with 'yyt add'…")
+		}
+
+		err := cleanClipboard(entries)
 		if err != nil {
+			cmd.SilenceUsage = true // no need to display Usage when a real error occurs
 			return errors.New("failed to clean the clipboard")
 		}
 
@@ -30,12 +36,9 @@ clean helps to make space for newer entries in the clipboard.`,
 	},
 }
 
-func cleanClipboard() error {
+func cleanClipboard(entries []ClipboardEntry) error {
 	var existingEntries []string
-	entries := getLinesFrom(0)
-	if entries == nil {
-		return fmt.Errorf("there are no items in the clipboard. add an item with 'yyt add'…")
-	}
+
 	missingEntries, _ := sortMissingEntries(entries)
 
 	if missingEntries == nil {

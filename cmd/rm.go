@@ -22,6 +22,7 @@ found. If nothing is found the command simply prints a message and exits.`,
 
 		err := removeFile(args)
 		if err != nil {
+			cmd.SilenceUsage = true // no need to display Usage when a real error occurs
 			return fmt.Errorf("failed to remove files: %w", err)
 		}
 		return nil

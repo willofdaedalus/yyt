@@ -23,6 +23,7 @@ yyt rm.`,
 		// simply delete the file itself
 		err := os.Remove(clipboardLocation)
 		if err != nil {
+			cmd.SilenceUsage = true // no need to display Usage when a real error occurs
 			return fmt.Errorf("failed to remove file: %w", err)
 		}
 

@@ -12,9 +12,16 @@ var listCmd = &cobra.Command{
 	Use:   "ls",
 	Short: "List all files currently in the clipboard",
 	Long:  `ls displays all files in the current file for inspection`,
-	RunE: func(_ *cobra.Command, args []string) error {
-		err := listFiles(args)
+	RunE: func(cmd *cobra.Command, args []string) error {
+		entries := getLinesFrom(0)
+		if entries == nil {
+			return fmt.Errorf(
+				"there are no items in the clipboard. add an item with 'yyt add'…")
+		}
+
+		err := listFiles(entries, args)
 		if err != nil {
+			cmd.SilenceUsage = true // no need to display Usage when a real error occurs
 			return fmt.Errorf("listing files: %w", err)
 		}
 		return nil
@@ -22,12 +29,7 @@ var listCmd = &cobra.Command{
 }
 
 // helper function for listing files
-func listFiles(args []string) error {
-	entries := getLinesFrom(0)
-	if entries == nil {
-		return fmt.Errorf(
-			"there are no items in the clipboard. add an item with 'yyt add'…")
-	}
+func listFiles(entries []ClipboardEntry, args []string) error {
 	missingEntries, clipboardEntries := sortMissingEntries(entries)
 
 	// checks every one of the user's input against the clipboard's entries

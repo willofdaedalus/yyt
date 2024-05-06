@@ -27,6 +27,7 @@ var addCmd = &cobra.Command{
 		if uniqueFiles != nil {
 			err := addFile(uniqueFiles)
 			if err != nil {
+				cmd.SilenceUsage = true // no need to display Usage when a real error occurs
 				return fmt.Errorf("adding files: %w", err)
 			}
 		}
