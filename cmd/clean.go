@@ -48,8 +48,8 @@ func cleanClipboard() error {
 		}
 	}
 
-    message := "yyt: the following files have been cleaned successfully"
-    writeToFile(message, existingEntries, missingEntries)
+	message := "yyt: the following files have been cleaned successfully"
+	writeToFile(message, existingEntries, missingEntries)
 
 	return nil
 }

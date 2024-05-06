@@ -54,7 +54,7 @@ var addCmd = &cobra.Command{
 // addFile adds files to the clipboard
 func addFile(files []ClipboardEntry) error {
 	var allFilePaths []string
-    message := "yyt: the following files have been added to successfully"
+	message := "yyt: the following files have been added to successfully"
 	currentSize, err := fileSize()
 
 	if err != nil {
@@ -85,7 +85,7 @@ func addFile(files []ClipboardEntry) error {
 			allFilePaths = append(allFilePaths, line.filePath)
 		}
 
-        writeToFile(message, allFilePaths, files)
+		writeToFile(message, allFilePaths, files)
 
 		return nil
 	}
@@ -106,13 +106,13 @@ func addFile(files []ClipboardEntry) error {
 		}
 	}
 
-    defer func() {
-        fmt.Println(message)
+	defer func() {
+		fmt.Println(message)
 
-        for _, f := range files {
-            fmt.Println(f.fileName)
-        }
-    }()
+		for _, f := range files {
+			fmt.Println(f.fileName)
+		}
+	}()
 
 	return nil
 }
@@ -129,8 +129,8 @@ func filterDuplicates(userArgs []string) ([]string, []string, []ClipboardEntry) 
 	existingEntries := getLinesFrom(0)
 
 	// Check if there are already entries in the clipboard
-    // there must be a better way to do this
-    // put a pin in it
+	// there must be a better way to do this
+	// put a pin in it
 	if existingEntries != nil {
 		for _, file := range uniqueFiles {
 			duplicate := false

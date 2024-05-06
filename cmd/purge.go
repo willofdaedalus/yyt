@@ -15,19 +15,19 @@ var purgeCmd = &cobra.Command{
 to start with a fresh clipboard without manually removing every entry with
 yyt rm.`,
 	Run: func(cmd *cobra.Command, args []string) {
-        // simply delete the file itself
-        if len(args) > 0 {
-            fmt.Println("yyt: purge doesn't require any arguments")
-            return
-        }
+		// simply delete the file itself
+		if len(args) > 0 {
+			fmt.Println("yyt: purge doesn't require any arguments")
+			return
+		}
 
-        err := os.Remove(clipboardLocation)
-        if err != nil {
-            fmt.Println("yyt: there are no entries in the clipboard")
-            return
-        }
+		err := os.Remove(clipboardLocation)
+		if err != nil {
+			fmt.Println("yyt: there are no entries in the clipboard")
+			return
+		}
 
-        fmt.Println("yyt: all entries have been cleared from the clipboard")
+		fmt.Println("yyt: all entries have been cleared from the clipboard")
 	},
 }
 
