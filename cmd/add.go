@@ -101,7 +101,7 @@ func addFile(files []ClipboardEntry) error {
 	}
 
 	for _, fileEntry := range allFilePaths {
-		if _, err := f.Write([]byte(fileEntry + "\n")); err != nil {
+		if _, err := f.WriteString(fileEntry + "\n"); err != nil {
 			return fmt.Errorf("error getting file size: %w", err)
 		}
 	}
