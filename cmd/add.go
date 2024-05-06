@@ -15,7 +15,7 @@ import (
 var addCmd = &cobra.Command{
 	Use:   "add",
 	Short: "add files to the clipboard",
-	Long:  `add files to the clipoard that allows you to keep track of them`,
+	Long:  `add files to the clipboard that allows you to keep track of them`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) == 0 {
 			fmt.Println("No files to add")
